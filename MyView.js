@@ -44,6 +44,7 @@ var MyView = React.createClass({
         this.fetchData();
     },
     fetchData: function(){
+
         this.setState({
             dataSource: this.state.dataSource.cloneWithRows(this.state.todoList)
         });
@@ -69,6 +70,7 @@ var MyView = React.createClass({
                     <ListView
                         dataSource={this.state.dataSource}
                         renderRow={this.renderTodo}
+                        onChangeVisibleRows={(visibleRows, changedRows) => console.log({visibleRows, changedRows})}
                     />
                 </View>
             );
@@ -118,16 +120,35 @@ var MyView = React.createClass({
 
             );
     },
+
+    _genRows: function(todo) {
+        var dataBlob = [];
+        for (var ii = 0; ii < this.state.todoList.length; ii++) {
+            var todoItem = this.state.todoList[ii];
+            if(todoItem==todo){
+                todoItem.status = "done";
+                this.state.todoList[ii].status = "done";
+            }
+            dataBlob.push({"index":todoItem.index, "input":todoItem.input, "status":todoItem.status});
+        }
+        return dataBlob;
+    },
+
     _pressRow : function(todo) {
-        console.log(this.state.todoList.indexOf(todo));
-        todo.status = "done";
-//        var removeIdx = this.state.todoList.indexOf(todo);
-//        this.state.todoList.splice(removeIdx,1);
-        console.log(this.state.todoList);
-        this.fetchData();
+        console.log("todo", todo);
+//        var selectedIndx = this.state.todoList.indexOf(todo);
+//        this.state.todoList[selectedIndx].status = "done";
+//        this.setState({
+//            dataSource: this.state.dataSource.cloneWithRows(this.state.todoList)
+//        });
+        this.setState({dataSource: this.state.dataSource.cloneWithRows(
+            this._genRows(todo)
+        )});
+//        console.log(this.state.todoList);
+//        this.fetchData();
     },
     addTodo : function() {
-        console.log(this.state.input);
+//        console.log(this.state.input);
         this.state.todoList.push({"index":this.state.index,"input":this.state.input, "status": "todo"});
         this.state.index++;
         this.fetchData();
