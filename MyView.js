@@ -1,19 +1,3 @@
-
-/**
- * The examples provided by Facebook are for non-commercial testing and
- * evaluation purposes only.
- *
- * Facebook reserves all rights not expressly granted.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL
- * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
- * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @flow
- */
 'use strict';
 
 var React = require('react-native');
@@ -27,7 +11,6 @@ var {
     View,
     } = React;
 
-var TodoList = [];
 
 var MyView = React.createClass({
     getInitialState: function() {
@@ -44,7 +27,6 @@ var MyView = React.createClass({
         this.fetchData();
     },
     fetchData: function(){
-
         this.setState({
             dataSource: this.state.dataSource.cloneWithRows(this.state.todoList)
         });
@@ -101,9 +83,8 @@ var MyView = React.createClass({
 
             );
     },
-    renderTodo : function(todo){
+    renderTodo : function(todo){ // 모듈을 떼어내자
         return (
-
                 <View>
                     <View style={styles.row}>
                         <Text style={styles.text}>
@@ -135,20 +116,11 @@ var MyView = React.createClass({
     },
 
     _pressRow : function(todo) {
-        console.log("todo", todo);
-//        var selectedIndx = this.state.todoList.indexOf(todo);
-//        this.state.todoList[selectedIndx].status = "done";
-//        this.setState({
-//            dataSource: this.state.dataSource.cloneWithRows(this.state.todoList)
-//        });
         this.setState({dataSource: this.state.dataSource.cloneWithRows(
             this._genRows(todo)
         )});
-//        console.log(this.state.todoList);
-//        this.fetchData();
     },
     addTodo : function() {
-//        console.log(this.state.input);
         this.state.todoList.push({"index":this.state.index,"input":this.state.input, "status": "todo"});
         this.state.index++;
         this.fetchData();
@@ -249,6 +221,5 @@ var styles = StyleSheet.create({
         flex: 1,
     },
 });
-
 
 module.exports = MyView;
