@@ -1,6 +1,8 @@
 'use strict';
 
 var React = require('react-native');
+var assign = require('object-assign');
+
 var {
     Image,
     ListView,
@@ -11,6 +13,22 @@ var {
     View,
     } = React;
 
+var _todos = {};
+
+function create(text) {
+    var id = (+new Date() + Math.floor(Math.random() * 999999)).toString(36);
+    _todos[id] = {
+        id: id,
+        complete: false,
+        text: text
+    };
+}
+function update(id, updates) {
+    _todos[id] = assign({}, _todos[id], updates);
+}
+function destroy(id) {
+    delete _todos[id];
+}
 
 var MyView = React.createClass({
     getInitialState: function() {
@@ -18,8 +36,6 @@ var MyView = React.createClass({
             dataSource: new ListView.DataSource({
                 rowHasChanged: (row1, row2) => row1 !== row2,
             }),
-            todoList : [],
-            index : 0,
             input : ""
         };
     },
@@ -28,11 +44,11 @@ var MyView = React.createClass({
     },
     fetchData: function(){
         this.setState({
-            dataSource: this.state.dataSource.cloneWithRows(this.state.todoList)
+            dataSource: this.state.dataSource.cloneWithRows(this._genRows())
         });
     },
     render: function() {
-        if(this.state.todoList.length == 0){
+        if(this._genRows().length == 0){
             return this.renderNothing();
         }else{
             return (
@@ -44,7 +60,7 @@ var MyView = React.createClass({
                         onChangeText={(text) => this.setState({input: text})}
                         placeholder='Do Something now'/>
                         <TouchableHighlight style={styles.button}
-                        onPress={this.addTodo}
+                        onPress={this._addTodo}
                         underlayColor='#99d9f4'>
                             <Text style={styles.buttonText}>Add</Text>
                         </TouchableHighlight>
@@ -69,7 +85,7 @@ var MyView = React.createClass({
                     onChangeText={(text) => this.setState({input: text})}
                     placeholder='Do Something now'/>
                     <TouchableHighlight style={styles.button}
-                    onPress={this.addTodo}
+                    onPress={this._addTodo}
                     underlayColor='#99d9f4'>
                         <Text style={styles.buttonText}>Add</Text>
                     </TouchableHighlight>
@@ -84,16 +100,23 @@ var MyView = React.createClass({
             );
     },
     renderTodo : function(todo){ // 모듈을 떼어내자
+        var todoItemStyle;
+        todoItemStyle = (todo.complete) ? styles.TodoItemDone : styles.TodoItem;
         return (
                 <View>
                     <View style={styles.row}>
-                        <Text style={styles.text}>
-                            {todo.input} : {todo.status}
+                        <Text style={todoItemStyle}>
+                            {todo.text}
                         </Text>
                         <TouchableHighlight style={styles.doneBtn}
-                        onPress={() => this._pressRow(todo)}
+                        onPress={() => this._pressDone(todo)}
                         underlayColor='#99d9f4'>
                             <Text style={styles.doneButtonText}>Done</Text>
+                        </TouchableHighlight>
+                        <TouchableHighlight style={styles.doneBtn}
+                        onPress={() => this._pressDel(todo)}
+                        underlayColor='#99d9f4'>
+                            <Text style={styles.doneButtonText}>Del</Text>
                         </TouchableHighlight>
                     </View>
                     <View style={styles.separator} />
@@ -102,27 +125,28 @@ var MyView = React.createClass({
             );
     },
 
-    _genRows: function(todo) {
-        var dataBlob = [];
-        for (var ii = 0; ii < this.state.todoList.length; ii++) {
-            var todoItem = this.state.todoList[ii];
-            if(todoItem==todo){
-                todoItem.status = "done";
-                this.state.todoList[ii].status = "done";
-            }
-            dataBlob.push({"index":todoItem.index, "input":todoItem.input, "status":todoItem.status});
+    _genRows: function() {
+        var todos = [];
+        for(var key in _todos) {
+            todos.push(_todos[key]);
         }
-        return dataBlob;
+        return todos;
     },
 
-    _pressRow : function(todo) {
-        this.setState({dataSource: this.state.dataSource.cloneWithRows(
-            this._genRows(todo)
-        )});
+    _pressDone : function(todo) {
+        update(todo.id, {complete: true});
+        this.fetchData();
     },
-    addTodo : function() {
-        this.state.todoList.push({"index":this.state.index,"input":this.state.input, "status": "todo"});
-        this.state.index++;
+    _pressDel : function(todo) {
+        destroy(todo.id);
+        this.fetchData();
+    },
+    _addTodo : function() {
+        var text = this.state.input;
+        if(text) create(text);
+            this.setState({
+                input: ''
+            });
         this.fetchData();
     },
 
@@ -172,7 +196,7 @@ var styles = StyleSheet.create({
         justifyContent: 'center'
     },
     doneButtonText: {
-        fontSize: 13,
+        fontSize: 11,
         color: 'white',
         alignSelf: 'center'
     },
@@ -217,8 +241,12 @@ var styles = StyleSheet.create({
         width: 64,
         height: 64,
     },
-    text: {
+    TodoItem : {
+        flex: 1
+    },
+    TodoItemDone: {
         flex: 1,
+        color : "red"
     },
 });
 
