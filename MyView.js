@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var assign = require('object-assign');
-
+var EditView = require('./EditView');
 var {
     Image,
     ListView,
@@ -114,6 +114,11 @@ var MyView = React.createClass({
                             <Text style={styles.doneButtonText}>Done</Text>
                         </TouchableHighlight>
                         <TouchableHighlight style={styles.doneBtn}
+                        onPress={() => this._pressEdit(todo)}
+                        underlayColor='#99d9f4'>
+                            <Text style={styles.doneButtonText}>Edit</Text>
+                        </TouchableHighlight>
+                        <TouchableHighlight style={styles.doneBtn}
                         onPress={() => this._pressDel(todo)}
                         underlayColor='#99d9f4'>
                             <Text style={styles.doneButtonText}>Del</Text>
@@ -133,6 +138,14 @@ var MyView = React.createClass({
         return todos;
     },
 
+    _pressEdit : function(todo) {
+        console.log(this.props);
+        this.props.navigator.push({
+            title: "edit",
+            component: EditView,
+            todo : todo
+        });
+    },
     _pressDone : function(todo) {
         update(todo.id, {complete: true});
         this.fetchData();
